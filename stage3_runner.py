@@ -1,5 +1,5 @@
 import numpy as np
-#from corrfit.io import to_gvar
+from corrfit.io import to_gvar
 
 from stage3_io import InputOutput
 #from stage3_gevp import rebuild_matrix, solve_gevp, project_correlator
@@ -7,11 +7,19 @@ from stage3_io import InputOutput
 
 
 def matrix_to_dict(C, tag):
-    Ncfg, Nops, _, Nt = C.shape
+    """
+    C shape: (Ncfg, Nt, Nops, Nops)
+    Output: (Ncfg, Nt) per (i,j)
+    """
+
+    Ncfg, Nt, Nops, _ = C.shape
+
     out = {}
+
     for i in range(Nops):
         for j in range(Nops):
-            out[(tag, (i, j))] = C[:, i, j, :]
+            out[(tag, (i, j))] = C[:, :, i, j]
+
     return out
 
 
@@ -33,20 +41,20 @@ class Stage3Runner:
 
         # 1️⃣ Load tsrc-averaged data
         C15, C6, CD, Cpi = self.io.load_data_stage3()
-        print(np.mean(C15[:, 0, 0, 0]))
-        print(np.mean(C15[:, 0, 0, :10]))
+        print(np.mean(C6[:, 0, 0, 0]))
+        print(np.mean(C6[:, 0, 0, :10]))
 
 
-        # # 2️⃣ Convert to corrfit dict
-        # data_dict = {}
-        # data_dict.update(matrix_to_dict(C15, "dpi_15"))
-        # data_dict.update(matrix_to_dict(C6,  "dpi_6"))
-        # data_dict[("D", "local")] = CD
-        # data_dict[("pi", "local")] = Cpi
+        # 2️⃣ Convert to corrfit dict
+        data_dict = {}
+        #data_dict.update(matrix_to_dict(C15, "dpi_15"))
+        #data_dict.update(matrix_to_dict(C6,  "dpi_6"))
+        data_dict[("D", "local")] = CD
+        data_dict[("pi", "local")] = Cpi
 
-        # # 3️⃣ Convert to gvar
-        # gdata = to_gvar(data_dict, decorrelate_keys=False)
-
+        # 3️⃣ Convert to gvar
+        gdata = to_gvar(data_dict, decorrelate_keys=True)
+        print(gdata)
         # results = {}
 
         # # 4️⃣ GEVP irreps
@@ -98,7 +106,7 @@ class Stage3Runner:
 if __name__ == "__main__":
     runner = Stage3Runner(
         project_path="/p/scratch/exflash/exotraction/stage2-matrix-assembly",
-        h5_name="b3.4-s32t64.h5",
+        h5_name="b3.4-stage3-input.h5",
         ensemble="b3.4"
     )
     runner.run()
