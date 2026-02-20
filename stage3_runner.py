@@ -97,7 +97,7 @@ class Stage3Runner:
         # return results
 if __name__ == "__main__":
     runner = Stage3Runner(
-        project_path="/home/grant/exotraction-cluster/stage2-matrix-assembly",
+        project_path="/p/scratch/exflash/exotraction/stage2-matrix-assembly",
         h5_name="b3.4-s32t64.h5",
         ensemble="b3.4"
     )
