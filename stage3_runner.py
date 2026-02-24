@@ -33,8 +33,8 @@ class Stage3Runner:
 
         # 1️⃣ Load tsrc-averaged data
         C15, C6, CD, Cpi = self.io.load_data_stage3()
-        print(np.mean(C15[:, 0, 0, 0]))
-        print(np.mean(C15[:, 0, 0, :10]))
+        print(np.mean(C6[:, 0, 0, 0]))
+        print(np.mean(C6[:, 0, 0, :10]))
 
 
         # # 2️⃣ Convert to corrfit dict

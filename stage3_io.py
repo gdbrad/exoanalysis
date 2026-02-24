@@ -9,7 +9,7 @@ class InputOutput(corrfit.io.InputOutput):
     def __init__(self, h5_name: str,
                  project_path=None,
                  tsrc_step=8,
-                 drop_first_tsrc=True):
+                 drop_first_tsrc=False):
 
         super().__init__(project_path=project_path)
 
@@ -60,7 +60,7 @@ class InputOutput(corrfit.io.InputOutput):
                 print(f"Averaging cfg {cfg}/{Ncfg}", flush=True)
             for k in range(Ntsrc):
                 shift = -k * self.tsrc_step
-                Cavg[cfg] += np.roll(C[cfg, k], shift, axis=-1)
+                Cavg[cfg] += np.roll(C[cfg, k], shift, axis=1)
 
 
                 Cavg /= Ntsrc
