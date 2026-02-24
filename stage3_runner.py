@@ -1,5 +1,9 @@
 import numpy as np
 from corrfit.io import to_gvar
+import matplotlib.pyplot as plt
+import gvar as gv
+import numpy as np
+
 
 from stage3_io import InputOutput
 #from stage3_gevp import rebuild_matrix, solve_gevp, project_correlator
@@ -53,8 +57,15 @@ class Stage3Runner:
         data_dict[("pi", "local")] = Cpi
 
         # 3️⃣ Convert to gvar
-        gdata = to_gvar(data_dict, decorrelate_keys=True)
+        gdata = to_gvar(data_dict, decorrelate_keys=False)
         print(gdata)
+        
+        c = gdata[('pi','local')]
+        means = gv.mean(c)
+        #data = ptot["meson1_correlator"]
+        plt.plot(np.arange(64), -means, '.')
+        plt.yscale('log')
+        plt.savefig('corr-pi.png')
         # results = {}
 
         # # 4️⃣ GEVP irreps
@@ -105,8 +116,8 @@ class Stage3Runner:
         # return results
 if __name__ == "__main__":
     runner = Stage3Runner(
-        project_path="/p/scratch/exflash/exotraction/stage2-matrix-assembly",
-        h5_name="b3.4-stage3-input.h5",
+        project_path="/p/scratch/exflash/exotraction/",
+        h5_name="b3.4-stage3-input-fix.h5",
         ensemble="b3.4"
     )
     runner.run()
