@@ -61,8 +61,8 @@ def build_Cij(stage1_dir, irrep_name, output_file):
                 data = dataset[:]  # (Ntsrc, Lt)
                 C[cfg_idx, :, i, j, :] = data
                 # reconstruct hermitian conj
-                if i != j:
-                    C[cfg_idx, :, j, i, :] = np.conjugate(data)
+                # if i != j:
+                #     C[cfg_idx, :, j, i, :] = np.conjugate(data)
     with h5py.File(output_file, "w") as f:
         f.create_dataset("Cij", data=C)
         f.create_dataset("operators",data=np.array(operator_list, dtype="S"))

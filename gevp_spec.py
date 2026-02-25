@@ -1,5 +1,6 @@
 import numpy as np 
-import gvar as gv 
+import gvar as gv
+import scipy  
 from scipy import linalg as la
 
 def bootstrap_to_gvar(Cboot):
@@ -49,35 +50,63 @@ def solve_gevp_bootstrap(Cboot, t0):
     return lam_boot
 
 
-def solve_gevp_jack(Cjk, t0, reg=1e-10):
-    """
-    cholesky reduction uses mean as metric
-    """
+def solve_gevp_jack(Cjk, t0, tol_rel=1e-6):
+
     Ncfg, Lt, N, _ = Cjk.shape
     lam = np.zeros((Ncfg, Lt, N))
     C0 = np.mean(Cjk[:, t0, :, :], axis=0)
-    C0 = 0.5 * (C0 + C0.T)
-    C0 += reg * np.eye(N)
-    # Cholesky factorization
-    evals = np.linalg.eigvalsh(C0)
+    C0 = 0.5 * (C0 + C0.conj().T)
+    evals, evecs = la.eigh(C0)
     print("C0 eigenvals:", evals)
-    try:
-        L = la.cholesky(C0, lower=True)
-    except la.LinAlgError:
-        print("Cholesky failed — increasing regularization")
-        C0 += 1e-8 * np.eye(N)
-        L = la.cholesky(C0, lower=True)
-    Linv = la.inv(L)
+    tol = tol_rel * np.max(evals)
+    keep = evals > tol
+    if not np.any(keep):
+        raise RuntimeError(" all of C0 eigenvalues below tol")
+    evals = evals[keep]
+    evecs = evecs[:, keep]
+    print(f"keepingg {len(evals)} / {N} modes")
+    C0_inv_sqrt = evecs @ np.diag(evals**-0.5) @ evecs.conj().T
+
+    # solve gevp
     for k in range(Ncfg):
         Cb = Cjk[k]
         for t in range(Lt):
-            Ct = 0.5 * (Cb[t] + Cb[t].T)
-            # standard eigenproblem
-            M = Linv @ Ct @ Linv.T
+            Ct = 0.5 * (Cb[t] + Cb[t].conj().T)
+            M = C0_inv_sqrt @ Ct @ C0_inv_sqrt.conj().T
             w, _ = la.eigh(M)
-            # Sort descending (largest eig == ground state)
-            lam[k, t] = np.sort(w)[::-1].real
+            lam[k, t, :len(w)] = np.sort(w)[::-1].real
+
     return lam
+
+# def solve_gevp_jack(Cjk, t0, reg=1e-10):
+#     """
+#     cholesky reduction uses mean as metric
+#     """
+#     Ncfg, Lt, N, _ = Cjk.shape
+#     lam = np.zeros((Ncfg, Lt, N))
+#     C0 = np.mean(Cjk[:, t0, :, :], axis=0)
+#     C0 = 0.5 * (C0 + C0.T)
+#     C0 += reg * np.eye(N)
+#     # Cholesky factorization
+#     evals = np.linalg.eigvalsh(C0)
+#     print("C0 eigenvals:", evals)
+#     try:
+#         L = la.cholesky(C0, lower=True)
+#     except la.LinAlgError:
+#         print("Cholesky failed — increasing regularization")
+#         C0 += 1e-8 * np.eye(N)
+#         L = la.cholesky(C0, lower=True)
+#     Linv = la.inv(L)
+#     for k in range(Ncfg):
+#         Cb = Cjk[k]
+#         for t in range(Lt):
+#             Ct = 0.5 * (Cb[t] + Cb[t].T)
+#             # standard eigenproblem
+#             M = Linv @ Ct @ Linv.T
+#             w, _ = la.eigh(M)
+#             # Sort descending (largest eig == ground state)
+#             lam[k, t] = np.sort(w)[::-1].real
+#     return lam
 
 
 # def solve_gevp_jack(Cjk, t0):

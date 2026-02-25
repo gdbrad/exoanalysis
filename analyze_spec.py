@@ -11,7 +11,7 @@ import gevp_spec
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--specfile", required=True)
-parser.add_argument("--t0", type=int, default=4)
+parser.add_argument("--t0", type=int, default=10)
 parser.add_argument("--tmin", type=int, default=4)
 parser.add_argument("--tmax", type=int, default=18)
 args = parser.parse_args()
@@ -28,8 +28,6 @@ with h5py.File(args.specfile, "r") as f:
             print("\n====================================")
             print("Channel:", channel)
             print("Flavor content :", flavor)
-            # print("Matrix id:", f[channel][flavor]["t0avg"]["Matrix"])
-            # print("Matrix id:", f[channel][flavor]["t0avg"]["Matrix"])
             dset = f[channel][flavor]["t0avg"]["Matrix"]
             print("PATH:", dset.name)
             Cjk = f[channel][flavor]["t0avg"]["Matrix"][:]
@@ -45,10 +43,8 @@ with h5py.File(args.specfile, "r") as f:
             print("Last element:", Cjk[-1,-1,-1,-1])
             
             
-            # RESTRICTING BASIS FOR NOW  (drop B and D)
             # TODO ADD BASIS RESTRICTION FLAG 
-            keep = [i for i, op in enumerate(ops) if "nabla" in op or "none" in op]
-
+            keep = [i for i, op in enumerate(ops)]
             Cjk = Cjk[:, :, keep, :][:, :, :, keep]
             ops = [ops[i] for i in keep]
             Ncfg, Lt, Nops, _ = Cjk.shape
@@ -168,7 +164,7 @@ with h5py.File(args.specfile, "r") as f:
             
             # fit ground state
             def one_exp(t, p):
-                return p["A"] * gv.exp(-p["E"] * t)
+                return (p["A"]) * gv.exp(-p["E"] * t) +p["A"] * gv.exp(-p["E"] * (Lt-t))
 
             prior = gv.BufferDict()
             prior["A"] = gv.gvar(1.0, 2.0)

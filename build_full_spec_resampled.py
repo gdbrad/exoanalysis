@@ -117,9 +117,10 @@ with h5py.File(OUTPUT_FILE, "w") as fout:
         Ccfg = tsrc_average(C)
         print("  after tsrc avg:", Ccfg.shape)
         print("shape before drop:", Ccfg.shape)
-        print("mean norm of cfg 58:",np.mean(np.abs(Ccfg[58])))
-        Ccfg = drop_bad_index(Ccfg, args.bad_idx)
-        print("  after drop:", Ccfg.shape)
+        if args.bad_idx:
+            print("mean norm of cfg 58:",np.mean(np.abs(Ccfg[58])))
+            Ccfg = drop_bad_index(Ccfg, args.bad_idx)
+            print("  after drop:", Ccfg.shape)
         # if "cfgs" in f:
         #     cfg_numbers = f["cfgs"][:]
         # else:
