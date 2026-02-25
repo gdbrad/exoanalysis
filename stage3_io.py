@@ -34,6 +34,9 @@ class InputOutput(corrfit.io.InputOutput):
             Cpi = f["pi"][:]
 
         print("Loaded Stage 2 matrices:")
+        print("Raw min/max:", np.min(C6), np.max(C6))
+        print("Raw NaNs:", np.isnan(C15).any())
+
         print("  C15:", C15.shape)
         print("  C6 :", C6.shape)
         print("  D  :", CD.shape)
@@ -101,9 +104,18 @@ class InputOutput(corrfit.io.InputOutput):
 
         C15, C6, CD, Cpi = self.load_stage2_matrices()
 
-        C15 = self.average_tsrc_matrix(C15)
-        C6  = self.average_tsrc_matrix(C6)
-        CD  = self.average_tsrc_single(CD)
-        Cpi = self.average_tsrc_single(Cpi)
+        # C15 = self.average_tsrc_matrix(C15)
+        # C6  = self.average_tsrc_matrix(C6)
+        # CD  = self.average_tsrc_single(CD)
+        # Cpi = self.average_tsrc_single(Cpi)
+
+        # bad = np.isnan(C15).any(axis=(1,2,3))
+        # print("Dropping configs:", np.where(bad)[0])
+
+        # C15 = C15[~bad]
+        # C6  = C6[~bad]
+        # CD  = CD[~bad]
+        # Cpi = Cpi[~bad]
+
 
         return C15, C6, CD, Cpi
