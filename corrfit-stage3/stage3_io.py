@@ -72,10 +72,6 @@ class InputOutput(corrfit.io.InputOutput):
         return Cavg
 
 
-    # ======================================================
-    # tsrc averaging (single)
-    # ======================================================
-
     def average_tsrc_single(self, C):
 
         if self.drop_first_tsrc:
@@ -96,9 +92,7 @@ class InputOutput(corrfit.io.InputOutput):
         return Cavg
 
 
-    # ======================================================
-    # Full Stage 3-ready loader
-    # ======================================================
+    # Stage 3loader
 
     def load_data_stage3(self):
 
